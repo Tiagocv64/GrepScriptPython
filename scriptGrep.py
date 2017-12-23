@@ -7,21 +7,16 @@ import getpass
 import traceback
 
 def main():
-<<<<<<< HEAD
-	global time_village
+	global time_village, driver, big_map_button, island_button, city_button, center_button, wood_indicator
 	time_village = 0
-=======
 
 	#Getting browser to use
 	option = input("Browser a usar: \n[1] Chrome\n[2] Firefox\nResposta: ")
 
->>>>>>> 790b14eed1d9085b16eca1fbfebaf3a4ced6eef4
 	#Getting credentials
 	username = input("\nUsername no grepolis: ")
 	password = getpass.getpass("Password da conta: ")
-	#pref_building = input("Escolhe um edificio para ir construindo com o tempo. ex: main, farm, lumber, academy, ... \n")
-
-	global driver
+	pref_building = input('Escolhe um edificio para ir automaticamente evoluindo:\n[0] Nenhum\n[1] Senado\n[2] Serracao\n[3] Quinta\n[4] Pedreira\n[5] Armazem\n[6] Mina de Prata\n[7] Quartel\n[8] Templo\n[9] Mercado\n[10] Porto\n[11] Academia\n[12] Muralha da cidade\n[13] Gruta\nResposta:')
 
 	#Set browser to Chrome and initialize driver
 	if option == "1":
@@ -58,7 +53,6 @@ def main():
 	time.sleep(2)
 
 	#Getting the four buttons on top left
-	global big_map_button, island_button, city_button, center_button, wood_indicator
 	big_map_button = driver.find_element_by_class_name('strategic_map')
 	island_button = driver.find_element_by_class_name('island_view')
 	city_button = driver.find_element_by_class_name('city_overview')
@@ -76,8 +70,11 @@ def main():
 	print("Stopped script!")
 
 
-def upgrade_building(building):
-	driver.execute_script("BuildingMain.buildBuilding('" + building + "', 60);")
+def upgrade_building(index):
+	if index == 0:
+		return
+	buildings = ["main", "lumber", "farm", "stoner", "storage", "ironer", "barracks", "temple", "market", "docks", "academy", "wall", "hide"]
+	driver.execute_script("BuildingMain.buildBuilding('" + buildings[index-1] + "', 60);")
 	time.sleep(1)
 
 def close_windows():
@@ -91,12 +88,9 @@ def close_windows():
 			pass
 
 def get_resources():
-<<<<<<< HEAD
 	global time_village
 	close_windows()
-=======
 	print("Starting to collect resources...")
->>>>>>> 790b14eed1d9085b16eca1fbfebaf3a4ced6eef4
 	island_button.click()
 	center_button.click()
 	time.sleep(1)
@@ -110,7 +104,7 @@ def get_resources():
 				list_owned_villages[i].click()
 				time.sleep(2)
 				card_claim_resources = driver.find_element_by_class_name('card_click_area')
-				#Get villages lowest waiting time 
+				#Get villages lowest waiting time
 				if time_village == 0:
 					container_time = driver.find_element_by_class_name('action_time')
 					time_village = int(container_time.text[:-1]) * 60
@@ -124,13 +118,8 @@ def get_resources():
 				time.sleep(1)
 			print("\nClaimed resources from " + str(successful) + " of " + str(n_villages) + " villages.")
 			break
-<<<<<<< HEAD
 		except WebDriverException:
 			trys += 1
-=======
-		except:
-			tries += 1
->>>>>>> 790b14eed1d9085b16eca1fbfebaf3a4ced6eef4
 
 if __name__ == "__main__":
 	main()
