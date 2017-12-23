@@ -7,7 +7,7 @@ import getpass
 import traceback
 
 def main():
-	global time_village, driver, big_map_button, island_button, city_button, center_button, wood_indicator
+	global time_village, driver, big_map_button, island_button, city_button, center_button, current_wood, current_stone, current_iron, current_population
 	time_village = 0
 
 	#Getting browser to use
@@ -57,8 +57,7 @@ def main():
 	island_button = driver.find_element_by_class_name('island_view')
 	city_button = driver.find_element_by_class_name('city_overview')
 	center_button = driver.find_element_by_class_name('btn_jump_to_town')
-	#wood_indicator = driver.find_element(By.CSS_SELECTOR , ".indicator.wood > .amount")
-	#print(wood_indicator.getText())
+	update_resources()
 
 	while True:
 		upgrade_building(pref_building)
@@ -70,6 +69,13 @@ def main():
 		time.sleep(time_village)
 	print("Stopped script!")
 
+
+def update_resources():
+	global current_wood, current_stone, current_iron, current_population
+	current_wood = int((driver.find_element(By.CSS_SELECTOR , ".indicator.wood > .amount")).text)
+	current_stone = int((driver.find_element(By.CSS_SELECTOR , ".indicator.stone > .amount")).text)
+	current_iron = int((driver.find_element(By.CSS_SELECTOR , ".indicator.iron > .amount")).text)
+	current_population = int((driver.find_element(By.CSS_SELECTOR , ".indicator.population > .amount")).text)
 
 def upgrade_building(index):
 	if index == 0:
@@ -120,7 +126,8 @@ def get_resources():
 			print("\nClaimed resources from " + str(successful) + " of " + str(n_villages) + " villages.")
 			break
 		except WebDriverException:
-			trys += 1
+			tries += 1
+	update_resources()
 
 if __name__ == "__main__":
 	main()
