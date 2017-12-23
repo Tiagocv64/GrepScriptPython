@@ -16,7 +16,7 @@ def main():
 	#Getting credentials
 	username = input("\nUsername no grepolis: ")
 	password = getpass.getpass("Password da conta: ")
-	pref_building = input('Escolhe um edificio para ir automaticamente evoluindo:\n[0] Nenhum\n[1] Senado\n[2] Serracao\n[3] Quinta\n[4] Pedreira\n[5] Armazem\n[6] Mina de Prata\n[7] Quartel\n[8] Templo\n[9] Mercado\n[10] Porto\n[11] Academia\n[12] Muralha da cidade\n[13] Gruta\nResposta:')
+	pref_building = int(input('Escolhe um edificio para ir automaticamente evoluindo:\n[0] Nenhum\n[1] Senado\n[2] Serracao\n[3] Quinta\n[4] Pedreira\n[5] Armazem\n[6] Mina de Prata\n[7] Quartel\n[8] Templo\n[9] Mercado\n[10] Porto\n[11] Academia\n[12] Muralha da cidade\n[13] Gruta\nResposta: '))
 
 	#Set browser to Chrome and initialize driver
 	if option == "1":
@@ -61,6 +61,7 @@ def main():
 	#print(wood_indicator.getText())
 
 	while True:
+		upgrade_building(pref_building)
 		try:
 			get_resources()
 		except WebDriverException:
