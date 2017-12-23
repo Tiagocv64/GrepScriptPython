@@ -7,11 +7,11 @@ import getpass
 def main():
 
 	#Getting browser to use
-	option = input("Browser a usar: \n[1] Chrome\n[2] Firefox\nResposta: ")
+	option = input("Select browser: \n[1] Chrome\n[2] Firefox\nAnswer: ")
 
 	#Getting credentials
-	username = input("\nUsername no grepolis: ")
-	password = getpass.getpass("Password da conta: ")
+	username = input("\nGrepolis username: ")
+	password = getpass.getpass("Account password: ")
 
 	global driver
 
@@ -41,7 +41,7 @@ def main():
 	pass_form.send_keys(password)
 	submit_button = driver.find_element_by_id('login_Login')
 	submit_button.click()
-	time.sleep(2)
+	time.sleep(4)
 
 	#Selecting world BASSAE in world selection
 	played_worlds_list = driver.find_element_by_class_name('world_name')
@@ -56,8 +56,12 @@ def main():
 	city_button = driver.find_element_by_class_name('city_overview')
 	center_button = driver.find_element_by_class_name('btn_jump_to_town')
 
+	# Getting the button to open city list
+	global town_name_button
+	town_name_button = driver.find_element_by_class_name('town_name')
+
 	while True:
-		get_resources()
+		resources_manager()
 		time.sleep(300)
 	print("Stopped script!")
 
@@ -75,30 +79,49 @@ def close_windows():
 		except:
 			pass
 
-def get_resources():
-	print("Starting to collect resources...")
+# Switches between cities and call get_resources() for each one
+def resources_manager():
 	island_button.click()
-	center_button.click()
 	time.sleep(1)
+	town_name_button.click()
+	time.sleep(2)
+	n_cities = len(driver.find_elements(By.CSS_SELECTOR , "div.town_group_town"))
+	list_of_cities = driver.find_elements(By.CSS_SELECTOR , "div.town_group_town")
+	
+	for i in range(n_cities):
+		list_of_cities = driver.find_elements(By.CSS_SELECTOR , "div.town_group_town")
+		list_of_cities[i].click()
+		time.sleep(2)
+		center_button.click()
+		get_resources()
+		town_name_button.click()
+		time.sleep(10)
+
+# Collect resources from all villages in the island of a given city
+def get_resources():
+	print("\nStarting to collect resources for city " + str(driver.find_element_by_class_name('town_name').text))
 	n_villages = len(driver.find_elements(By.CSS_SELECTOR , "a.owned.farm_town"))
 	tries = 0
 	while tries < 30:
 		try:
 			successful = 0
+			same_island_villages = 0
 			for i in range(n_villages):
 				list_owned_villages = driver.find_elements(By.CSS_SELECTOR , "a.owned.farm_town")
-				list_owned_villages[i].click()
-				time.sleep(2)
-				card_claim_resources = driver.find_element_by_class_name('card_click_area')
-				try:
-					card_claim_resources.click()
-					print("Claimed " + str(driver.find_element_by_class_name('action_count').text) + " resources from village " + str(driver.find_element_by_class_name('village_name').text))
-					successful += 1
-				except:
-					pass
-				close_windows()
-				time.sleep(1)
-			print("\nClaimed resources from " + str(successful) + " of " + str(n_villages) + " villages.")
+				if list_owned_villages[i].get_attribute("data-same_island") == "true":
+					same_island_villages += 1
+					list_owned_villages[i].click()
+					time.sleep(2)
+					card_claim_resources = driver.find_element_by_class_name('card_click_area')
+					try:
+						card_claim_resources.click()
+						print("Claimed " + str(driver.find_element_by_class_name('action_count').text) + " resources from village " + str(driver.find_element_by_class_name('village_name').text))
+						successful += 1
+					except:
+						pass
+					close_windows()
+					time.sleep(1)
+			print("Claimed resources from " + str(successful) + " of " + str(same_island_villages) + " villages.")
 			break
 		except:
 			tries += 1
