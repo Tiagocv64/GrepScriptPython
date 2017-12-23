@@ -5,16 +5,31 @@ import time
 import getpass
 
 def main():
+
+	#Getting browser to use
+	option = input("Browser a usar: \n[1] Chrome\n[2] Firefox\nResposta: ")
+
 	#Getting credentials
-	username = input("Username no grepolis: ")
+	username = input("\nUsername no grepolis: ")
 	password = getpass.getpass("Password da conta: ")
 
-	#Opening browser in Grepolis page
-	print("Opening Chrome...")
-	opts = webdriver.ChromeOptions()
-	opts.add_argument("--start-maximized")
 	global driver
-	driver = webdriver.Chrome(chrome_options=opts)
+
+	#Set browser to Chrome and initialize driver
+	if option == "1":
+		print("\nOpening Chrome...")
+		opts = webdriver.ChromeOptions()
+		opts.add_argument("--start-maximized")
+		driver = webdriver.Chrome(chrome_options=opts)
+
+	#Set browser to Firefox and initialize driver
+	elif option == "2":
+		print("\nOpening Firefox...")
+		opts = webdriver.FirefoxProfile()
+		driver = webdriver.Firefox(firefox_profile=opts)
+		driver.maximize_window()
+
+	#Opening browser in Grepolis page
 	driver.get("https://pt47.grepolis.com/")
 
 	#Entering credentials to page
@@ -65,8 +80,8 @@ def get_resources():
 	center_button.click()
 	time.sleep(1)
 	n_villages = len(driver.find_elements(By.CSS_SELECTOR , "a.owned.farm_town"))
-	trys = 0
-	while trys < 30:
+	tries = 0
+	while tries < 30:
 		try:
 			successful = 0
 			for i in range(n_villages):
@@ -84,7 +99,7 @@ def get_resources():
 			print("Claimed resources from " + str(successful) + " of " + str(n_villages) + " villages.")
 			break
 		except:
-			trys += 1
+			tries += 1
 
 if __name__ == "__main__":
 	main()
