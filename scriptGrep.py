@@ -76,6 +76,7 @@ def close_windows():
 			pass
 
 def get_resources():
+	print("Starting to collect resources...")
 	island_button.click()
 	center_button.click()
 	time.sleep(1)
@@ -91,12 +92,13 @@ def get_resources():
 				card_claim_resources = driver.find_element_by_class_name('card_click_area')
 				try:
 					card_claim_resources.click()
+					print("Claimed " + str(driver.find_element_by_class_name('action_count').text) + " resources from village " + str(driver.find_element_by_class_name('village_name').text))
 					successful += 1
 				except:
 					pass
 				close_windows()
 				time.sleep(1)
-			print("Claimed resources from " + str(successful) + " of " + str(n_villages) + " villages.")
+			print("\nClaimed resources from " + str(successful) + " of " + str(n_villages) + " villages.")
 			break
 		except:
 			tries += 1
