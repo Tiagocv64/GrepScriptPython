@@ -7,19 +7,37 @@ import getpass
 import traceback
 
 def main():
+<<<<<<< HEAD
 	global time_village
 	time_village = 0
+=======
+
+	#Getting browser to use
+	option = input("Browser a usar: \n[1] Chrome\n[2] Firefox\nResposta: ")
+
+>>>>>>> 790b14eed1d9085b16eca1fbfebaf3a4ced6eef4
 	#Getting credentials
-	username = input("Username no grepolis: ")
+	username = input("\nUsername no grepolis: ")
 	password = getpass.getpass("Password da conta: ")
 	#pref_building = input("Escolhe um edificio para ir construindo com o tempo. ex: main, farm, lumber, academy, ... \n")
 
-	#Opening browser in Grepolis page
-	print("Opening Chrome...")
-	opts = webdriver.ChromeOptions()
-	opts.add_argument("--start-maximized")
 	global driver
-	driver = webdriver.Chrome(chrome_options=opts)
+
+	#Set browser to Chrome and initialize driver
+	if option == "1":
+		print("\nOpening Chrome...")
+		opts = webdriver.ChromeOptions()
+		opts.add_argument("--start-maximized")
+		driver = webdriver.Chrome(chrome_options=opts)
+
+	#Set browser to Firefox and initialize driver
+	elif option == "2":
+		print("\nOpening Firefox...")
+		opts = webdriver.FirefoxProfile()
+		driver = webdriver.Firefox(firefox_profile=opts)
+		driver.maximize_window()
+
+	#Opening browser in Grepolis page
 	driver.get("https://pt47.grepolis.com/")
 
 	#Entering credentials to page
@@ -73,14 +91,18 @@ def close_windows():
 			pass
 
 def get_resources():
+<<<<<<< HEAD
 	global time_village
 	close_windows()
+=======
+	print("Starting to collect resources...")
+>>>>>>> 790b14eed1d9085b16eca1fbfebaf3a4ced6eef4
 	island_button.click()
 	center_button.click()
 	time.sleep(1)
 	n_villages = len(driver.find_elements(By.CSS_SELECTOR , "a.owned.farm_town"))
-	trys = 0
-	while trys < 30:
+	tries = 0
+	while tries < 30:
 		try:
 			successful = 0
 			for i in range(n_villages):
@@ -94,15 +116,21 @@ def get_resources():
 					time_village = int(container_time.text[:-1]) * 60
 				try:
 					card_claim_resources.click()
+					print("Claimed " + str(driver.find_element_by_class_name('action_count').text) + " resources from village " + str(driver.find_element_by_class_name('village_name').text))
 					successful += 1
 				except WebDriverException:
 					pass
 				close_windows()
 				time.sleep(1)
-			print("Claimed resources from " + str(successful) + " of " + str(n_villages) + " villages.")
+			print("\nClaimed resources from " + str(successful) + " of " + str(n_villages) + " villages.")
 			break
+<<<<<<< HEAD
 		except WebDriverException:
 			trys += 1
+=======
+		except:
+			tries += 1
+>>>>>>> 790b14eed1d9085b16eca1fbfebaf3a4ced6eef4
 
 if __name__ == "__main__":
 	main()
