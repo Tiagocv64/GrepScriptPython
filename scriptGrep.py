@@ -2,7 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException
-from selenium.common.exceptions import NoSuchElementException   
+from selenium.common.exceptions import NoSuchElementException
 import time
 import getpass
 import traceback
@@ -190,6 +190,7 @@ def resources_manager():
 		get_resources()
 		town_name_button.click()
 		time.sleep(2)
+	town_name_button.click()
 
 # Collect resources from all villages in the island of a given city
 def get_resources():
@@ -220,11 +221,7 @@ def get_resources():
 						container_time = driver.find_element_by_class_name('action_time')
 						tmp_time_village = int(container_time.text[:-1]) * 60
 
-						if time_village == 0:
-							container_time = driver.find_element_by_class_name('action_time')
-							time_village = int(container_time.text[:-1]) * 60
-
-						elif time_village < tmp_time_village:
+						if time_village == 0 or time_village < tmp_time_village:
 							time_village = tmp_time_village
 
 						#Try to collect resources
