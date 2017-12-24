@@ -2,24 +2,70 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException
+from selenium.common.exceptions import NoSuchElementException   
 import time
 import getpass
 import traceback
+import argparse
+import sys
+
+global parser
+# Instantiate the parser
+parser = argparse.ArgumentParser(description='Multipurpose bot for use with Grepolis')
+
+# Specifies Chrome as the browser to use
+parser.add_argument('-c', action='store_true', default=False, dest='useChrome',
+                    help='Specifies Chrome as the browser to use')
+
+# Specifies Firefox as the browser to use
+parser.add_argument('-f', action='store_true', default=False, dest='useFirefox',
+                    help='Specifies Firefox as the browser to use')
+
+# Specifies your grepolis username
+parser.add_argument('-u', dest='username',
+                    help='Specifies your grepolis username')
+
+#Specifies buildings to automatically upgrade
+parser.add_argument('-b', type=int, nargs='*', dest='pref_buildings',
+                    default=[],
+                    help='Specifies buildings to automatically upgrade : 1 - Senate, 2 - Timber Camp, 3 - Farm, 4 - Quarry, 5 - Warehouse, 6 - Silver Mine, 7 - Barracks, 8 - Temple, 9 - Market, 10 - Harbour, 11 - Academy, 12 - City Wall, 13 - Cave',
+                    )
 
 def main():
-	global time_village, driver, big_map_button, island_button, city_button, center_button, town_name_button, current_wood, current_stone, current_iron, current_population
+	global args, time_village, driver, big_map_button, island_button, city_button, center_button, town_name_button, current_wood, current_stone, current_iron, current_population
 	time_village = 0
 
+	#Getting arguments
+	args = parser.parse_args()
+
+	#If both -c and -f arguments were used
+	if args.useChrome and args.useFirefox:
+		print("Error! Flags '-c' and '-f' can not be simultaneaously active!")
+		sys.exit()
+
 	#Getting browser to use
-	option = input("Select browser: \n[1] Chrome\n[2] Firefox\nAnswer: ")
+	if args.useChrome:
+		option = "1"
+	elif args.useFirefox:
+		option = "2"
+	else:
+		option = input("Select browser: \n[1] Chrome\n[2] Firefox\nAnswer: ")
 
 	#Getting credentials
-	username = input("\nGrepolis username: ")
+	if args.username == None:
+		username = input("\nGrepolis username: ")
+	else:
+		username = args.username
+
 	password = getpass.getpass("Account password: ")
 
 	#Getting buildings to automatically upgrade
-	pref_buildings = [int(i) for i in ((input('\nSelect buildings to automatically upgrade:\n[0] None\n[1] Senate\n[2] Timber Camp\n[3] Farm\n[4] Quarry\n[5] Warehouse\n[6] Silver Mine\n[7] Barracks\n[8] Temple\n[9] Market\n[10] Harbour\n[11] Academy\n[12] City Wall\n[13] Cave\nEx: 11 3 1 (It will build Academy then Farm then Senate)\nAnswer: ')).split(" "))]
-	pref_buildings.append(0)
+	if args.pref_buildings == []:
+		pref_buildings = [int(i) for i in ((input('\nSelect buildings to automatically upgrade:\n[0] None\n[1] Senate\n[2] Timber Camp\n[3] Farm\n[4] Quarry\n[5] Warehouse\n[6] Silver Mine\n[7] Barracks\n[8] Temple\n[9] Market\n[10] Harbour\n[11] Academy\n[12] City Wall\n[13] Cave\nEx: 11 3 1 (It will build Academy then Farm then Senate)\nAnswer: ')).split(" "))]
+		pref_buildings.append(0)
+	else:
+		pref_buildings = args.pref_buildings
+		pref_buildings.append(0)
 
 	#Set browser to Chrome and initialize driver
 	if option == "1":
@@ -106,14 +152,29 @@ def close_windows():
 	center_button.click()
 	time.sleep(0.5)
 	close_buttons = driver.find_elements(By.CSS_SELECTOR , "div.btn_wnd.close")
-	for b_close in close_buttons:
+	for i in range(len(close_buttons)):
 		try:
+			#The foremost window is the last element of the array
+			close_buttons = driver.find_elements(By.CSS_SELECTOR , "div.btn_wnd.close")
+			b_close = close_buttons[len(close_buttons) - (i + 1)]
 			b_close.click()
+			time.sleep(1)
 		except WebDriverException:
 			pass
 
+def elementExists(mode, str):
+	try:
+		if mode == 0:
+			driver.find_element_by_class_name(str)
+		elif mode == 1:
+			driver.find_element_by_id(str)
+	except NoSuchElementException:
+		return False
+	return True
+
 # Switches between cities and call get_resources() for each one
 def resources_manager():
+	close_windows()
 	island_button.click()
 	time.sleep(1)
 	town_name_button.click()
@@ -141,32 +202,56 @@ def get_resources():
 		try:
 			successful = 0
 			same_island_villages = 0
+			warehouse_not_full = True
 			for i in range(n_villages):
 				list_owned_villages = driver.find_elements(By.CSS_SELECTOR , "a.owned.farm_town")
 
+				#If village is on the selected city's island
 				if list_owned_villages[i].get_attribute("data-same_island") == "true":
 					same_island_villages += 1
-					list_owned_villages[i].click()
-					time.sleep(2)
-					card_claim_resources = driver.find_element_by_class_name('card_click_area')
 
-					#Get villages lowest waiting time
-					container_time = driver.find_element_by_class_name('action_time')
-					tmp_time_village = int(container_time.text[:-1]) * 60
+					#If previous attempts did not reveal the popup saying warehouse is full
+					if warehouse_not_full:
+						list_owned_villages[i].click()
+						time.sleep(2)
+						card_claim_resources = driver.find_element_by_class_name('card_click_area')
 
-					if time_village == 0:
+						#Get villages lowest waiting time
 						container_time = driver.find_element_by_class_name('action_time')
-						time_village = int(container_time.text[:-1]) * 60
+						tmp_time_village = int(container_time.text[:-1]) * 60
 
-					elif time_village < tmp_time_village:
-						time_village = tmp_time_village
+						if time_village == 0:
+							container_time = driver.find_element_by_class_name('action_time')
+							time_village = int(container_time.text[:-1]) * 60
 
-					try:
-						card_claim_resources.click()
-						print("Claimed " + str(driver.find_element_by_class_name('action_count').text) + " resources from village " + str(driver.find_element_by_class_name('village_name').text))
-						successful += 1
-					except WebDriverException:
-						pass
+						elif time_village < tmp_time_village:
+							time_village = tmp_time_village
+
+						#Try to collect resources
+						try:
+
+							#If popup that indicates resouces ready to collect does not appear next to village icon, then say 0 resources were collected
+							if not elementExists(1, str(list_owned_villages[i].get_attribute("id")) + "_claim"):
+								print("Claimed 0 resources from village " + str(driver.find_element_by_class_name('village_name').text) + ", cooldown was in effect")
+
+							else:
+								card_claim_resources.click()
+								time.sleep(2)
+
+								#If popup appears about wasting resources, then warehouse is full and no further resources can be collected
+								#This could be done via simply breaking the loop if warehous is full but we wouldn't know the true value of same_island_villages
+								if elementExists(0, 'confirmation'):
+									close_windows()
+									print('Warehouse capacity overflowed in current city!')
+									warehouse_not_full = False
+
+								#If all is normal, proceed as planned
+								else:
+									print("Claimed " + str(driver.find_element_by_class_name('action_count').text) + " resources from village " + str(driver.find_element_by_class_name('village_name').text))
+									successful += 1
+
+						except WebDriverException:
+							pass
 					close_windows()
 					time.sleep(1)
 
