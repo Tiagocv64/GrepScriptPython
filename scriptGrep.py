@@ -187,6 +187,7 @@ def resources_manager():
 		list_of_cities[i].click()
 		time.sleep(2)
 		center_button.click()
+		time.sleep(2)
 		get_resources()
 		town_name_button.click()
 		time.sleep(2)
@@ -221,7 +222,7 @@ def get_resources():
 						container_time = driver.find_element_by_class_name('action_time')
 						tmp_time_village = int(container_time.text[:-1]) * 60
 
-						if time_village == 0 or time_village < tmp_time_village:
+						if time_village == 0 or time_village > tmp_time_village:
 							time_village = tmp_time_village
 
 						#Try to collect resources
