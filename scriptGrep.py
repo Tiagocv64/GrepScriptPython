@@ -32,7 +32,7 @@ parser.add_argument('-b', type=int, nargs='*', dest='pref_buildings',
                     )
 
 def main():
-	global args, time_village, driver, big_map_button, island_button, city_button, center_button, town_name_button, current_wood, current_stone, current_iron, current_population
+	global args, world, time_village, driver, big_map_button, island_button, city_button, center_button, town_name_button, current_wood, current_stone, current_iron, current_population
 	time_village = 0
 
 	#Getting arguments
@@ -58,6 +58,13 @@ def main():
 		username = args.username
 
 	password = getpass.getpass("Account password: ")
+
+	world = input("\nSelect World: \n[1] Bassae\n[2] Doriscos\nAnswer: ")
+
+	if world == "1":
+		world = "BASSAE"
+	else:
+		world = "DORISCOS"
 
 	#Getting buildings to automatically upgrade
 	if args.pref_buildings == []:
@@ -97,7 +104,7 @@ def main():
 
 	#Selecting world BASSAE in world selection
 	played_worlds_list = driver.find_element_by_class_name('world_name')
-	current_world = played_worlds_list.find_element_by_xpath('//div[contains(text(), "BASSAE")]')
+	current_world = played_worlds_list.find_element_by_xpath('//div[contains(text(), "' + world + '" )]')
 	current_world.click()
 	time.sleep(2)
 
